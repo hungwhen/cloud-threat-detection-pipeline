@@ -37,3 +37,13 @@ resource "aws_cloudtrail" "main" {
   is_multi_region_trail =                    true
   enable_log_file_validation =               true
 }
+
+resource "aws_sns_topic" "alerts" {
+  name = "ctd-alerts-${var.account_id}"
+}
+
+resource "aws_sns_topic_subscription" "email" {
+  topic_arn = aws_sns_topic.alerts.arn
+  protocol = "email"
+  endpoint = var.alert_email
+}
