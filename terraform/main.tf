@@ -47,3 +47,21 @@ resource "aws_sns_topic_subscription" "email" {
   protocol = "email"
   endpoint = var.alert_email
 }
+
+resource "aws_s3_bucket" "athena_results {
+
+  bucket = "ctd-athena-results-${var.account_id}-${var.region}"
+  acl = "private"
+  force_destroy = false
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "aws_athena_database" "cloudtrail_db" {
+
+  name = "ctd_cloudtrail_db"
+  bucket = aws_s3_bucket.athena_results.bucket
+
+}
