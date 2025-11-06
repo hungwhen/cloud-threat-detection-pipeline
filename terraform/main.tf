@@ -65,3 +65,74 @@ resource "aws_athena_database" "cloudtrail_db" {
   bucket = aws_s3_bucket.athena_results.bucket
 
 }
+
+
+resource "aws_iam_role" "lambda_detection_role" {
+
+  name = "ctd-lambda-detection-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {Service = "lambda.amazonaws.com"}
+    }]
+  })
+
+}
+
+resource "aws_iam_role_policy" "lambda_detection_policy" {
+  name = "ctd-lambda-detection-policy"
+  role = aws_iam_role.lambda_detection_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+    #Athena 
+    {
+      Effect = "Allow"
+      Action = [
+        "athena:StartQueryExecution",
+        "athena:GetQueryExecution",
+        "athena:GetQueryResults"
+      ]
+    },
+    #S3 buckets
+    {
+      Effect = "Allow"
+      Action = [
+        "s3:GetObject",
+        "s3:ListBucket"
+      ]
+      Resource =  [
+        aws_s3_bucket.cloudtrail_logs.arn,
+        "${aws_s3_bucket.cloudtrail_logs.arn}/*",
+        aws_s3_bucket.athena_results.arn,
+        "${aws_s3_bucket.athena_results.arn}/*"
+      ]
+    },
+
+    # SNS alerts
+    {
+      Effect = "Allow"
+      Action = ["sns:Publish"]
+      Resource = aws_sns_topic.alerts.arn
+    },
+
+    #Cloudwatch logging
+
+    {
+      Effect = "Allow"
+      Action = [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ]
+      Resource = "arn:aws:logs:${var.region}:${var.account_id}:*"
+    }
+
+    ]
+  })
+
+}
