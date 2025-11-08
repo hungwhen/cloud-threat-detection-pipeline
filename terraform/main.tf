@@ -137,3 +137,43 @@ resource "aws_iam_role_policy" "lambda_detection_policy" {
   })
 
 }
+
+resource "aws_s3_bucket_policy" "cloudtrail_logs" {
+
+  bucket = aws_s3_bucket.cloudtrail_logs.id
+
+  policy = jsonencode({
+    Statement = [
+      {
+        Sid = "AWSCloudTrailAclCheck"
+        Effect = "Allow"
+        Principal = {
+          Service = "cloudtrail.amazonaws.com"
+        }
+      
+        Action = "s3:GetBucketAcl"
+        Resource = aws_s3_bucket.cloudtrail_logs.arn
+      },
+      {
+        Sid = "AWSCloudTrailWrite"
+        Effect = "Allow" 
+        Principal = {
+          Service = "cloudtrail.amazonaws.com"
+        }
+
+        Action = "s3:PutObject"
+        Resource = "${aws_s3_bucket.cloudtrail_logs.arn}/AWSLogs/${var.account_id}/*"
+
+        Condition = {
+          StringEquals = {
+            "s3:x-amz-acl" = "bucket-owner-full-control"
+          }
+
+        }
+
+      }
+    ]
+  
+  })
+
+}
