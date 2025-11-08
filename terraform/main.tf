@@ -24,7 +24,7 @@ resource "aws_s3_bucket" "cloudtrail_logs" {
   force_destroy = false // no delete if theres objects in the bucket...
 
   // more anti deletion
-  lifecycle = {
+  lifecycle {
     prevent_destroy = true
   }
 
@@ -33,7 +33,7 @@ resource "aws_s3_bucket" "cloudtrail_logs" {
 resource "aws_cloudtrail" "main" {
   name =                                     "ctd-trail"
   s3_bucket_name =                           aws_s3_bucket.cloudtrail_logs.id
-  include_global_services_events =           true
+  include_global_service_events =           true
   is_multi_region_trail =                    true
   enable_log_file_validation =               true
 }
@@ -48,7 +48,7 @@ resource "aws_sns_topic_subscription" "email" {
   endpoint = var.alert_email
 }
 
-resource "aws_s3_bucket" "athena_results {
+resource "aws_s3_bucket" "athena_results" {
 
   bucket = "ctd-athena-results-${var.account_id}-${var.region}"
   acl = "private"
@@ -97,6 +97,7 @@ resource "aws_iam_role_policy" "lambda_detection_policy" {
         "athena:GetQueryExecution",
         "athena:GetQueryResults"
       ]
+    Resource = "*"
     },
     #S3 buckets
     {
