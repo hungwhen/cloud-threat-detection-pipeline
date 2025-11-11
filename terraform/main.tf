@@ -97,7 +97,7 @@ resource "aws_iam_role_policy" "lambda_detection_policy" {
         "athena:GetQueryExecution",
         "athena:GetQueryResults"
       ]
-    Resource = "*"
+      Resource = "*"
     },
     #S3 buckets
     {
@@ -140,7 +140,7 @@ resource "aws_iam_role_policy" "lambda_detection_policy" {
 
 resource "aws_lambda_function" "detection" {
   function_name = "ctd-detection"
-  role = aws_iam_role.lambda_detection
+  role = aws_iam_role.lambda_detection.arn
   runtime = "python3.11"
   handler = "lambda_function.handler"
 
@@ -204,7 +204,7 @@ resource "aws_cloudwatch_event_rule" "ctd_schedule" {
 resource "aws_cloudwatch_event_target" "ctd_lambda_target" {
   rule = aws_cloudwatch_event_rule.ctd_schedule.name
   target_id = "ctd-lambda"
-  arn = aws_lambda_function.detetion.arn
+  arn = aws_lambda_function.detection.arn
 }
 
 resource "aws_lambda_permission" "allow_eventbridge_invoke" {
