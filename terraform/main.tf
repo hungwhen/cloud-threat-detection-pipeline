@@ -225,3 +225,53 @@ resource "aws_athena_workgroup" "ctd" {
   }
   state = "ENABLED"
 }
+
+
+resource "aws_glue_catalog_database" "ctd" {
+  name = aws_athena_database.cloudtrail_db.name
+}
+
+resource "aws_glue_catalog_table" "cloudtrail_logs" {
+  name = "cloudtrail_logs"
+  database_name = aws_glue_catalog_database.ctd.name
+
+  table_type = "EXTERNAL_TABLE"
+
+  storage_descriptor {
+    location = "s3://${aws_s3_bucket.cloudtrail_logs.bucket}/AWSLogs/${var.account_id}/CloudTrail/"
+    input_format = "org.apache.hadoop.mapred.TextInputFormat"
+    output_format = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
+
+    serde_info {
+      serialization_library = "org.openx.data.jsonserde.JsonSerDe"
+    }
+
+    columns = [
+      { name = "eventversion", type = "string" },
+      { name = "useridentity", type = "string" },
+      { name = "eventtime",    type = "string" },
+      { name = "eventsource",  type = "string" },
+      { name = "eventname",    type = "string" },
+      { name = "awsregion",    type = "string" },
+      { name = "sourceipaddress", type = "string" },
+      { name = "useragent",    type = "string" },
+      { name = "errorcode",    type = "string" },
+      { name = "requestparameters", type = "string" },
+      { name = "responseelements",  type = "string" },
+      { name = "additionaldata",    type = "string" },
+      { name = "resources",         type = "string" },
+      { name = "eventid",           type = "string" },
+      { name = "eventtype",         type = "string" },
+      { name = "apiversion",        type = "string" },
+      { name = "readonly",          type = "string" },
+      { name = "recipientaccountid", type = "string" },
+      { name = "serviceeventdetails", type = "string" },
+      { name = "sharedeventid",       type = "string" },
+      { name = "vpcendpointid",       type = "string" }
+    ]
+    
+  }
+  parameters = {
+    "classification" = "json"
+  }
+}
