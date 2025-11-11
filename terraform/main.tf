@@ -138,6 +138,28 @@ resource "aws_iam_role_policy" "lambda_detection_policy" {
 
 }
 
+resource "aws_lambda_function" "detection" {
+  function_name = "ctd-detection"
+  role = aws_iam_role.lambda_detection
+  runtime = "python3.11"
+  handler = "lambda_function.handler"
+
+  filename = "build/ctd_detection.zip" # could be s3_bucket + s3_key
+  source_code_hash = filebase64sha256("build/ctd_detection.zip")
+
+  timeout = 60
+
+  environment {
+    variables = {
+      ATHENA_DB_NAME = aws_athena_database.cloudtrail_db.name
+      ATHENA_WORKGROUP = aws_athena_workgroup.ctd.name
+      SNS_TOPIC_ARN = aws_sns_topic.alerts.arn
+      CLOUDTRAIL_S3_BUCKET = aws_s3_bucket.cloudtrail_logs.bucket
+    }
+  }
+
+}
+
 resource "aws_s3_bucket_policy" "cloudtrail_logs" {
 
   bucket = aws_s3_bucket.cloudtrail_logs.id
