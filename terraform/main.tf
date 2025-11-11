@@ -168,12 +168,27 @@ resource "aws_s3_bucket_policy" "cloudtrail_logs" {
           StringEquals = {
             "s3:x-amz-acl" = "bucket-owner-full-control"
           }
-
         }
-
       }
     ]
-  
   })
+}
 
+resource "aws_cloudwatch_event_rule" "ctd_schedule" {
+  name = "ctd-detection-schedule"
+  schedule_expression = "rate(5 minutes)" # or cron()
+}
+
+resource "aws_cloudwatch_event_target" "ctd_lambda_target" {
+  rule = aws_cloudwatch_event_rule.ctd_schedule.name
+  target_id = "ctd-lambda"
+  arn = aws_lambda_function.detetion.arn
+}
+
+resource "aws_lambda_permission" "allow_eventbridge_invoke" {
+  statement_id = "AllowExecutionFromEventBridge"
+  action = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.detection.function_name
+  principal = "events.amazonaws.com"
+  source_arn = aws_cloudwatch_event_rule.ctd_schedule.arn
 }
