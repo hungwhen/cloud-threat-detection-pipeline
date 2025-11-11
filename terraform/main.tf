@@ -214,3 +214,14 @@ resource "aws_lambda_permission" "allow_eventbridge_invoke" {
   principal = "events.amazonaws.com"
   source_arn = aws_cloudwatch_event_rule.ctd_schedule.arn
 }
+
+resource "aws_athena_workgroup" "ctd" {
+  name = "ctd_workgroup"
+  configuration {
+    result_configuration {
+      output_location = "s3://${aws_s3_bucket.athena_results.bucket}/results/"
+    }
+    enforce_workgroup_configuration = true
+  }
+  state = "ENABLED"
+}
