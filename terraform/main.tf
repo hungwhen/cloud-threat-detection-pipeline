@@ -140,7 +140,7 @@ resource "aws_iam_role_policy" "lambda_detection_policy" {
 
 resource "aws_lambda_function" "detection" {
   function_name = "ctd-detection"
-  role = aws_iam_role.lambda_detection.arn
+  role = aws_iam_role.lambda_detection_role.arn
   runtime = "python3.11"
   handler = "lambda_function.handler"
 
