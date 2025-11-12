@@ -62,3 +62,25 @@ def start_athena_query(query : str) -> str:
   execution_id = resp["QueryExecutionId"]
   print(f"[INFORMATION] Started Athena Query Execution ID:{execution_id}")
   return execution_id
+
+def wait_for_query(execution_id: str, poll_interval: int = 3) -> Dict[str,Any]:
+  #poll athena until the query finishes. return response or raise error if query fails.
+
+  state = "RUNNING"
+  last_resp = {}
+
+  while state in ("RUNNING", "QUEUED"):
+    time.sleep(poll_interval)
+    last_resp = ATHENA.get_query_execution(QueryExecutionId=execution_id)
+    state = last_resp["QueryExecution"]["Status"]["State"]
+    print(f"[DEBUGGING] query state for {execution_id}: {state}")
+
+  if state != "SUCCEEDED":
+    reason = last_resp["QueryExecution"]["Status"].get(
+      "StateChangeReason", "Unknown"
+    )
+    print(f"[ERROR] Athena query FAILED LMAO: {reason}")
+    raise RuntimeError(f"Athena query failed LMAO: {reason}")
+
+  return last_resp
+
