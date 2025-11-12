@@ -38,3 +38,27 @@ SUSPICIOUS_ACTIONS = [
   "PutBucketPolicy"
   
 ]
+
+def build_detection_query(lookback_minutes: int = 10) -> str:
+  # BUILD UP THE ATEHNA SQL QUERY
+
+  action_list = ",".join(f"'{x}'" for x in SUSPICIOUS_ACTIONS)
+  query = f"""
+  SELECT eventtime, useridentity, eventname, sourceipaddress, awsregion
+  FROM cloudtrail_logs
+  WHERE eventname IN ({action_list})
+    AND from_iso8601_timestamp(eventtime) > current_timestamp - interval '{lookback_minutes}' minute
+  """
+  return query
+
+def start_athena_query(query : str) -> str:
+  #start athena query
+  resp = ATHENA.start_query_execution(
+    QueryString=query,
+    QueryExecutionContext={"Database": ATHENA_DB_NAME},
+    WorkGroup=ATHENA_WORKGROUP,
+  )
+
+  execution_id = resp["QueryExecutionId"]
+  print(f"[INFORMATION] Started Athena Query Execution ID:{execution_id}")
+  return execution_id
