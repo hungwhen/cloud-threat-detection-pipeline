@@ -84,3 +84,60 @@ def wait_for_query(execution_id: str, poll_interval: int = 3) -> Dict[str,Any]:
 
   return last_resp
 
+def fetch_query_results(execution_id: str) -> List[Dict[str, Any]]:
+  results = ATHENA.get_query_results(QueryExecutionId=execution_id)
+  rows = results.get("ResultSet", {}).get("Rows", [])
+
+  data_rows = rows[1:] if len(rows) > 1 else []
+  print(f"[INFORMATION] Retrieved {len(data_rows)} data rows from Athena.")
+  return data_rows
+
+def parse_rows_to_events(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+  events: List[Dict[str, Any]] =[]
+
+  for row in rows:
+    cols = row.get("Data", [])
+    values = [c.get("VarCharValue", "") for c in cols]
+
+    event = {
+      "eventTime": values[0] if len(values) > 0 else "",
+      "userIdentity": values[1] if len(values) > 1 else "",
+      "eventName": values[2] if len(values) > 2 else "",
+      "sourceIP": values[3] if len(values) > 3 else "",
+      "region": values[4] if len(values) > 4 else "",
+    }
+
+    events.append(event)
+  print(f"[INFORMATION] Parsed {len(events)} suspicious events :)")
+  return events
+
+def build_alert_message(events: List[Dict[str, Any]]) -> str:
+
+  payload = {
+    "summary": f"{len(events)} suspicious cloudtrail events detected",
+    "findings": events,
+    "mitre mapping": {
+      "Privilege Escalation": "T1078 / T1098",
+      "Data Exfiltration" : "T1537 / T1041",
+      "Defense Evasion" : "T1562",
+    },
+  }
+  msg_str = json.dumps(payload, indent=2)
+  print("[DEBUG] Alert payload:")
+  print(msg_str)
+  return msg_str
+
+def publish_sns_alert(message: str) -> None:
+
+  print("[INFORMATION] pushing alert to SNS...")
+
+  SNS.publish(
+    TopicArn=SNS_TOPIC_ARN,
+    Subject="[CTD] CloudTrail Threat Detection Alert",
+    Message = message,
+  )
+
+  print("[INFORMATION] sns alert published")
+
+
+
