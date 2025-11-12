@@ -139,5 +139,28 @@ def publish_sns_alert(message: str) -> None:
 
   print("[INFORMATION] sns alert published")
 
+def handler(event, context):
 
+  print("[INFORMATION] lambda is starting... python is RUNNING")
+  query = build_detection_query(lookback_minutes=10)
+  execution_id = start_athena_query(query)
+
+  try:
+    wait_for_query(execution_id)
+  except RuntimeError as e:
+    return {"status code" : 500, "body": str(e)}
+
+  rows = fetch_query_results(execution_id)
+  if not rows:
+    print("[INFORMATION] nothing sus was found lol")
+    return {"status code": 200, "body": "nothing sus was found"}
+
+  events = parse_rows_to_events(rows)
+  message = build_alert_message(events)
+  publish_sns_alert(message)
+
+  return {
+    "status code" : 200,
+    "body": f"Alert sent: {len(events)} findings",
+  }
 
