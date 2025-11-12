@@ -3,6 +3,8 @@ import json
 import boto3 #amazon python SDK
 import time
 
+from typing import List, Dict, Any
+
 ATHENA = boto3.client("athena")
 SNS = boto3.client("sns")
 
