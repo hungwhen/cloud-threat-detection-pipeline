@@ -25,7 +25,7 @@ resource "aws_s3_bucket" "cloudtrail_logs" {
 
   // more anti deletion
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
 }
@@ -55,7 +55,7 @@ resource "aws_s3_bucket" "athena_results" {
   force_destroy = false
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 }
 

@@ -2,6 +2,12 @@
 # Terraform
 ############################
 
+# Ignore variable files
+terraform.tfvars
+*.tfvars
+
+
+
 # Local .terraform directory
 .terraform/
 
