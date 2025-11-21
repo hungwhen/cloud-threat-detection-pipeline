@@ -99,6 +99,26 @@ resource "aws_iam_role_policy" "lambda_detection_policy" {
       ]
       Resource = "*"
     },
+
+        # Glue Data Catalog (Athena needs this)
+    {
+      Effect = "Allow"
+      Action = [
+        "glue:GetDatabase",
+        "glue:GetDatabases",
+        "glue:GetTable",
+        "glue:GetTables",
+        "glue:GetPartition",
+        "glue:GetPartitions"
+      ]
+      Resource = [
+        "arn:aws:glue:${var.region}:${var.account_id}:catalog",
+        "arn:aws:glue:${var.region}:${var.account_id}:database/${aws_athena_database.cloudtrail_db.name}",
+        "arn:aws:glue:${var.region}:${var.account_id}:table/${aws_athena_database.cloudtrail_db.name}/*"
+      ]
+    },
+
+
         # S3 buckets (CloudTrail logs + Athena results)
     {
       Effect = "Allow"
