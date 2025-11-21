@@ -99,20 +99,24 @@ resource "aws_iam_role_policy" "lambda_detection_policy" {
       ]
       Resource = "*"
     },
-    #S3 buckets
+        # S3 buckets (CloudTrail logs + Athena results)
     {
       Effect = "Allow"
       Action = [
         "s3:GetObject",
-        "s3:ListBucket"
+        "s3:ListBucket",
+        "s3:GetBucketLocation",
+        "s3:PutObject",
+        "s3:PutObjectAcl"
       ]
-      Resource =  [
+      Resource = [
         aws_s3_bucket.cloudtrail_logs.arn,
         "${aws_s3_bucket.cloudtrail_logs.arn}/*",
         aws_s3_bucket.athena_results.arn,
         "${aws_s3_bucket.athena_results.arn}/*"
       ]
     },
+
 
     # SNS alerts
     {
