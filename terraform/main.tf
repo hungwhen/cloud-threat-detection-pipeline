@@ -228,7 +228,6 @@ resource "aws_athena_workgroup" "ctd" {
 }
 
 
-
 resource "aws_glue_catalog_table" "cloudtrail_logs" {
   name          = "cloudtrail_logs"
   database_name = aws_athena_database.cloudtrail_db.name
@@ -314,6 +313,26 @@ resource "aws_glue_catalog_table" "cloudtrail_logs" {
     columns {
       name = "recipientaccountid"
       type = "string"
+    }
+    columns {
+      name = "serviceeventdetails"
+      type = "string"
+    }
+    columns {
+      name = "sharedeventid"
+      type = "string"
+    }
+    columns {
+      name = "vpcendpointid"
+      type = "string"
+    }
+  }
+
+  parameters = {
+    "classification" = "json"
+  }
+}
+
 
 
 resource "aws_s3_bucket_public_access_block" "cloudtrail_logs" {
