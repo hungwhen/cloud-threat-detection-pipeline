@@ -144,8 +144,9 @@ resource "aws_lambda_function" "detection" {
   runtime = "python3.11"
   handler = "lambda_function.handler"
 
-  filename = "build/ctd_detection.zip" # could be s3_bucket + s3_key
-  source_code_hash = filebase64sha256("build/ctd_detection.zip")
+  filename         = "../lambdas/build/ctd_detection.zip"
+  source_code_hash = filebase64sha256("../lambdas/build/ctd_detection.zip")
+
 
   timeout = 60
 
@@ -242,33 +243,95 @@ resource "aws_glue_catalog_table" "cloudtrail_logs" {
     input_format = "org.apache.hadoop.mapred.TextInputFormat"
     output_format = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
 
-    serde_info {
+    ser_de_info {
       serialization_library = "org.openx.data.jsonserde.JsonSerDe"
     }
 
-    columns = [
-      { name = "eventversion", type = "string" },
-      { name = "useridentity", type = "string" },
-      { name = "eventtime",    type = "string" },
-      { name = "eventsource",  type = "string" },
-      { name = "eventname",    type = "string" },
-      { name = "awsregion",    type = "string" },
-      { name = "sourceipaddress", type = "string" },
-      { name = "useragent",    type = "string" },
-      { name = "errorcode",    type = "string" },
-      { name = "requestparameters", type = "string" },
-      { name = "responseelements",  type = "string" },
-      { name = "additionaldata",    type = "string" },
-      { name = "resources",         type = "string" },
-      { name = "eventid",           type = "string" },
-      { name = "eventtype",         type = "string" },
-      { name = "apiversion",        type = "string" },
-      { name = "readonly",          type = "string" },
-      { name = "recipientaccountid", type = "string" },
-      { name = "serviceeventdetails", type = "string" },
-      { name = "sharedeventid",       type = "string" },
-      { name = "vpcendpointid",       type = "string" }
-    ]
+        columns {
+      name = "eventversion"
+      type = "string"
+    }
+    columns {
+      name = "useridentity"
+      type = "string"
+    }
+    columns {
+      name = "eventtime"
+      type = "string"
+    }
+    columns {
+      name = "eventsource"
+      type = "string"
+    }
+    columns {
+      name = "eventname"
+      type = "string"
+    }
+    columns {
+      name = "awsregion"
+      type = "string"
+    }
+    columns {
+      name = "sourceipaddress"
+      type = "string"
+    }
+    columns {
+      name = "useragent"
+      type = "string"
+    }
+    columns {
+      name = "errorcode"
+      type = "string"
+    }
+    columns {
+      name = "requestparameters"
+      type = "string"
+    }
+    columns {
+      name = "responseelements"
+      type = "string"
+    }
+    columns {
+      name = "additionaldata"
+      type = "string"
+    }
+    columns {
+      name = "resources"
+      type = "string"
+    }
+    columns {
+      name = "eventid"
+      type = "string"
+    }
+    columns {
+      name = "eventtype"
+      type = "string"
+    }
+    columns {
+      name = "apiversion"
+      type = "string"
+    }
+    columns {
+      name = "readonly"
+      type = "string"
+    }
+    columns {
+      name = "recipientaccountid"
+      type = "string"
+    }
+    columns {
+      name = "serviceeventdetails"
+      type = "string"
+    }
+    columns {
+      name = "sharedeventid"
+      type = "string"
+    }
+    columns {
+      name = "vpcendpointid"
+      type = "string"
+    }
+
     
   }
   parameters = {
