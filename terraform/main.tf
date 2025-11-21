@@ -228,26 +228,22 @@ resource "aws_athena_workgroup" "ctd" {
 }
 
 
-resource "aws_glue_catalog_database" "ctd" {
-  name = aws_athena_database.cloudtrail_db.name
-}
 
 resource "aws_glue_catalog_table" "cloudtrail_logs" {
-  name = "cloudtrail_logs"
-  database_name = aws_glue_catalog_database.ctd.name
-
-  table_type = "EXTERNAL_TABLE"
+  name          = "cloudtrail_logs"
+  database_name = aws_athena_database.cloudtrail_db.name
+  table_type    = "EXTERNAL_TABLE"
 
   storage_descriptor {
-    location = "s3://${aws_s3_bucket.cloudtrail_logs.bucket}/AWSLogs/${var.account_id}/CloudTrail/"
-    input_format = "org.apache.hadoop.mapred.TextInputFormat"
+    location      = "s3://${aws_s3_bucket.cloudtrail_logs.bucket}/AWSLogs/${var.account_id}/CloudTrail/"
+    input_format  = "org.apache.hadoop.mapred.TextInputFormat"
     output_format = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
 
     ser_de_info {
       serialization_library = "org.openx.data.jsonserde.JsonSerDe"
     }
 
-        columns {
+    columns {
       name = "eventversion"
       type = "string"
     }
@@ -318,26 +314,7 @@ resource "aws_glue_catalog_table" "cloudtrail_logs" {
     columns {
       name = "recipientaccountid"
       type = "string"
-    }
-    columns {
-      name = "serviceeventdetails"
-      type = "string"
-    }
-    columns {
-      name = "sharedeventid"
-      type = "string"
-    }
-    columns {
-      name = "vpcendpointid"
-      type = "string"
-    }
 
-    
-  }
-  parameters = {
-    "classification" = "json"
-  }
-}
 
 resource "aws_s3_bucket_public_access_block" "cloudtrail_logs" {
   bucket = aws_s3_bucket.cloudtrail_logs.id
