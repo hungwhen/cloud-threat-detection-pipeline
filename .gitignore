@@ -1,0 +1,56 @@
+############################
+# Terraform
+############################
+
+# Local .terraform directory
+.terraform/
+
+# Terraform state files
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*.tfvars.json
+
+# Terraform plan files
+*.plan
+
+############################
+# AWS Lambda / Python
+############################
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+
+# Lambda build artifacts
+lambdas/build/
+*.zip
+
+############################
+# VS Code and Visual Studio
+############################
+
+# VS Code settings
+.vscode/
+
+# Visual Studio working folder (was causing your Git errors)
+.vs/
+
+############################
+# OS / editor junk
+############################
+
+# macOS / Windows / Editor
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
