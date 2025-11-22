@@ -249,6 +249,9 @@ resource "aws_athena_workgroup" "ctd" {
     enforce_workgroup_configuration = true
   }
   state = "ENABLED"
+
+  force_destroy = true
+
 }
 
 
@@ -263,8 +266,9 @@ resource "aws_glue_catalog_table" "cloudtrail_logs" {
     output_format = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
 
     ser_de_info {
-      serialization_library = "org.openx.data.jsonserde.JsonSerDe"
+        serialization_library = "com.amazon.emr.hive.serde.CloudTrailSerde"
     }
+
 
     columns {
       name = "eventversion"
