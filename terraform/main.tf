@@ -254,7 +254,6 @@ resource "aws_athena_workgroup" "ctd" {
 
 }
 
-
 resource "aws_glue_catalog_table" "cloudtrail_logs" {
   name          = "cloudtrail_logs"
   database_name = aws_athena_database.cloudtrail_db.name
@@ -262,104 +261,114 @@ resource "aws_glue_catalog_table" "cloudtrail_logs" {
 
   storage_descriptor {
     location      = "s3://${aws_s3_bucket.cloudtrail_logs.bucket}/AWSLogs/${var.account_id}/CloudTrail/"
-    input_format  = "org.apache.hadoop.mapred.TextInputFormat"
+    input_format  = "com.amazon.emr.cloudtrail.CloudTrailInputFormat"
     output_format = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
 
     ser_de_info {
-        serialization_library = "com.amazon.emr.hive.serde.CloudTrailSerde"
+      serialization_library = "com.amazon.emr.hive.serde.CloudTrailSerde"
     }
 
-
     columns {
-      name = "eventversion"
+      name = "eventVersion"
       type = "string"
     }
     columns {
-      name = "useridentity"
+      name = "userIdentity"
+      type = "struct<type:string,principalId:string,arn:string,accountId:string,invokedBy:string,accessKeyId:string,userName:string,sessionContext:struct<attributes:struct<mfaAuthenticated:string,creationDate:string>,sessionIssuer:struct<type:string,principalId:string,arn:string,accountId:string,userName:string>>>"
+    }
+    columns {
+      name = "eventTime"
       type = "string"
     }
     columns {
-      name = "eventtime"
+      name = "eventSource"
       type = "string"
     }
     columns {
-      name = "eventsource"
+      name = "eventName"
       type = "string"
     }
     columns {
-      name = "eventname"
+      name = "awsRegion"
       type = "string"
     }
     columns {
-      name = "awsregion"
+      name = "sourceIPAddress"
       type = "string"
     }
     columns {
-      name = "sourceipaddress"
+      name = "userAgent"
       type = "string"
     }
     columns {
-      name = "useragent"
+      name = "errorCode"
       type = "string"
     }
     columns {
-      name = "errorcode"
+      name = "errorMessage"
       type = "string"
     }
     columns {
-      name = "requestparameters"
+      name = "requestParameters"
       type = "string"
     }
     columns {
-      name = "responseelements"
+      name = "responseElements"
       type = "string"
     }
     columns {
-      name = "additionaldata"
+      name = "additionalEventData"
+      type = "string"
+    }
+    columns {
+      name = "requestID"
+      type = "string"
+    }
+    columns {
+      name = "eventID"
+      type = "string"
+    }
+    columns {
+      name = "readOnly"
       type = "string"
     }
     columns {
       name = "resources"
+      type = "array<struct<arn:string,accountId:string,type:string>>"
+    }
+    columns {
+      name = "eventType"
       type = "string"
     }
     columns {
-      name = "eventid"
+      name = "apiVersion"
       type = "string"
     }
     columns {
-      name = "eventtype"
+      name = "recipientAccountId"
       type = "string"
     }
     columns {
-      name = "apiversion"
+      name = "serviceEventDetails"
       type = "string"
     }
     columns {
-      name = "readonly"
+      name = "sharedEventID"
       type = "string"
     }
     columns {
-      name = "recipientaccountid"
-      type = "string"
-    }
-    columns {
-      name = "serviceeventdetails"
-      type = "string"
-    }
-    columns {
-      name = "sharedeventid"
-      type = "string"
-    }
-    columns {
-      name = "vpcendpointid"
+      name = "vpcEndpointId"
       type = "string"
     }
   }
 
   parameters = {
-    "classification" = "json"
+    classification = "cloudtrail"
   }
 }
+
+
+
 
 
 

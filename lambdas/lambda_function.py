@@ -42,16 +42,25 @@ SUSPICIOUS_ACTIONS = [
 ]
 
 def build_detection_query(lookback_minutes: int = 10) -> str:
-  # BUILD UP THE ATEHNA SQL QUERY
+    action_list = ",".join(f"'{x}'" for x in SUSPICIOUS_ACTIONS)
+    query = f"""
+    SELECT
+      eventtime,
+      eventname,
+      useridentity.userName    AS username,
+      useridentity.arn         AS user_arn,
+      sourceipaddress,
+      awsregion
+    FROM cloudtrail_logs
+    WHERE eventname IN ({action_list})
+      AND from_iso8601_timestamp(eventtime)
+            > current_timestamp - interval '{lookback_minutes}' minute
+    ORDER BY eventtime DESC
+    """
+    return query
 
-  action_list = ",".join(f"'{x}'" for x in SUSPICIOUS_ACTIONS)
-  query = f"""
-  SELECT eventtime, useridentity, eventname, sourceipaddress, awsregion
-  FROM cloudtrail_logs
-  WHERE eventname IN ({action_list})
-    AND from_iso8601_timestamp(eventtime) > current_timestamp - interval '{lookback_minutes}' minute
-  """
-  return query
+
+
 
 def start_athena_query(query : str) -> str:
   #start athena query
@@ -95,23 +104,23 @@ def fetch_query_results(execution_id: str) -> List[Dict[str, Any]]:
   return data_rows
 
 def parse_rows_to_events(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-  events: List[Dict[str, Any]] =[]
+    events: List[Dict[str, Any]] = []
 
-  for row in rows:
-    cols = row.get("Data", [])
-    values = [c.get("VarCharValue", "") for c in cols]
+    for row in rows:
+        cols = row.get("Data", [])
+        values = [c.get("VarCharValue", "") for c in cols]
 
-    event = {
-      "eventTime": values[0] if len(values) > 0 else "",
-      "userIdentity": values[1] if len(values) > 1 else "",
-      "eventName": values[2] if len(values) > 2 else "",
-      "sourceIP": values[3] if len(values) > 3 else "",
-      "region": values[4] if len(values) > 4 else "",
-    }
+        event = {
+            "eventTime":   values[0] if len(values) > 0 else "",
+            "userIdentity": values[1] if len(values) > 1 else "",
+            "eventName":    values[2] if len(values) > 2 else "",
+            "sourceIP":     values[3] if len(values) > 3 else "",
+            "region":       values[4] if len(values) > 4 else "",
+        }
 
-    events.append(event)
-  print(f"[INFORMATION] Parsed {len(events)} suspicious events :)")
-  return events
+        events.append(event)
+    return events
+
 
 def build_alert_message(events: List[Dict[str, Any]]) -> str:
 
