@@ -112,14 +112,17 @@ def parse_rows_to_events(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
         event = {
             "eventTime":   values[0] if len(values) > 0 else "",
-            "userIdentity": values[1] if len(values) > 1 else "",
-            "eventName":    values[2] if len(values) > 2 else "",
-            "sourceIP":     values[3] if len(values) > 3 else "",
-            "region":       values[4] if len(values) > 4 else "",
+            "eventName":   values[1] if len(values) > 1 else "",
+            "userIdentity": values[2] if len(values) > 2 else "",  # username
+            # values[3] is the user_arn (optional)
+            "sourceIP":    values[4] if len(values) > 4 else "",
+            "region":      values[5] if len(values) > 5 else "",
         }
 
         events.append(event)
+
     return events
+
 
 
 def build_alert_message(events: List[Dict[str, Any]]) -> str:
