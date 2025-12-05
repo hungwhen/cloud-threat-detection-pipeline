@@ -16,3 +16,6 @@ I am building this as a personal experiment in cloud security and detection engi
 - **Infrastructure:** Terraform (we'll see)  
 - **Detection Mapping:** MITRE ATT&CK (T1098, T1562, T1537)  
 - **Testing:** Replay scripts, synthetic CloudTrail events
+
+'
+<img width="1233" height="517" alt="image" src="https://github.com/user-attachments/assets/85abdb1c-eb3b-407c-a160-b2cef8e5a63e" />
